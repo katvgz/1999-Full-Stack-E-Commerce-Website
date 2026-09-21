@@ -1,0 +1,36 @@
+.admin-real-orders { display: grid; gap: 24px; }
+.admin-orders-message { padding: 32px 0; font-size: 13px; line-height: 1.7; }
+.admin-real-order .admin-section-heading { align-items: start; }
+.admin-real-order .admin-section-heading h2 { overflow-wrap: anywhere; }
+.admin-real-order .admin-section-heading p { margin-top: 9px; font-size: 11px; color: #717268; }
+.admin-real-order .admin-section-heading > strong { font-size: 18px; }
+.admin-order-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 24px; }
+.admin-order-detail-grid > section { min-width: 0; }
+.admin-order-detail-grid h3 { font-size: 10px; letter-spacing: 1.2px; margin-bottom: 14px; }
+.admin-order-detail-grid dl { display: grid; grid-template-columns: minmax(90px, 1fr) 2fr; gap: 8px 16px; margin: 0; font-size: 12px; line-height: 1.6; }
+.admin-order-detail-grid dt { color: #717268; }
+.admin-order-detail-grid dd { margin: 0; overflow-wrap: anywhere; }
+.admin-order-detail-grid p { font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.admin-order-notes { white-space: pre-wrap; }
+.admin-order-totals { margin: 0; padding: 22px 24px; border-top: 1px solid #cecdc4; display: grid; gap: 10px; }
+.admin-order-totals > div { display: flex; justify-content: space-between; gap: 20px; font-size: 12px; }
+.admin-order-totals dd { margin: 0; }
+.admin-order-totals > div:last-child { font-weight: 700; padding-top: 10px; }
+.admin-payment-review { padding: 20px 24px; border-top: 1px solid #cecdc4; }
+.admin-payment-review p { font-size: 12px; line-height: 1.7; margin-block: 8px 14px; overflow-wrap: anywhere; }
+.admin-payment-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.admin-payment-actions button { min-height: 44px; padding: 14px 18px; background: var(--ink); color: var(--paper); font-size: 10px; font-weight: 600; letter-spacing: 1px; border: 1px solid var(--ink); }
+.admin-payment-actions .admin-payment-secondary { background: transparent; color: var(--ink); }
+.admin-payment-actions button:disabled { opacity: .55; cursor: wait; }
+.admin-payment-status { display: inline-block; padding: 4px 8px; font-size: 10px; text-transform: uppercase; }
+.admin-payment-approved { color: #4b5842; background: #dce0d4; }
+.admin-payment-rejected { color: #803c30; background: #e9d8d0; }
+.admin-payment-pending { color: #795b31; background: #e5dcc8; }
+.admin-payment-error { color: #803c30; }
+.admin-payment-success { color: #4b5842; }
+.admin-shipping-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; margin: 20px 0; }
+.admin-shipping-fields label { display: grid; gap: 8px; font-size: 10px; letter-spacing: .8px; }
+.admin-shipping-fields input { min-width: 0; width: 100%; height: 46px; padding: 10px; border: 1px solid #bab9b0; border-radius: 0; background: transparent; color: var(--ink); font-size: 16px; }
+@media (max-width: 900px) {
+  .admin-order-detail-grid { grid-template-columns: 1fr; padding: 20px 16px; }
+}

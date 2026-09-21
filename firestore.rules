@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function exactKeys(data, count) {
+      // Required fields are read by the validators below; a missing field denies
+      // the write. Avoid checking the same keys twice within the expression budget.
+      return data.keys().size() == count;
+    }
+    function text(value, maxLength) {
+      // matches() also enforces a string value, without a duplicate type check.
+      return value.size() <= maxLength && value.matches('.*[^ ].*');
+    }
+    // Validate immutable product identity and price together, without repeated
+    // dynamic catalog lookups. Keep this list in sync with products.js.
+    function checkedLine(item) {
+      let quantity = item.quantity;
+      let price = item.unitPrice;
+      return item.keys().size() == 5
+        && price is int && quantity is int
+        && (item.productId + ':' + item.productName + ':' + string(price) + ':' + item.size + ':' + string(quantity)).matches(
+          '^(001:1999 Distressed Tee:699|002:Still Here Tee:699|003:Smaller World Tee:749|004:Good Things Tee:699|005:Different Day Tee:749|006:1999 Cargo Denim:1499|007:1999 Washed Denim:1399|008:1999 Graphic Denim:1599):(S|M|L|XL):[1-5]$')
+        && quantity <= get(/databases/$(database)/documents/products/$(item.productId)).data.stock[item.size]
+        ? [price * quantity, item.productId + item.size] : [-1000000000, 'invalid'];
+    }
+    function lineTotal(items, index) {
+      return index < items.size() ? checkedLine(items[index]) : [0, index];
+    }
+    function validItems(items, subtotal) {
+      // Evaluate each line once; at most eight distinct stock documents are read.
+      let a = lineTotal(items, 0);
+      let b = lineTotal(items, 1);
+      let c = lineTotal(items, 2);
+      let d = lineTotal(items, 3);
+      let e = lineTotal(items, 4);
+      let f = lineTotal(items, 5);
+      let g = lineTotal(items, 6);
+      let h = lineTotal(items, 7);
+      return subtotal == a[0] + b[0] + c[0] + d[0] + e[0] + f[0] + g[0] + h[0]
+        // Prevent splitting the same product/size across lines to evade limits.
+        && [a[1], b[1], c[1], d[1], e[1], f[1], g[1], h[1]].toSet().size() == 8;
+    }
+    function validCustomer(customer) {
+      return exactKeys(customer, 3)
+        && text(customer.fullName, 120) && text(customer.email, 254)
+        && customer.email.matches('^[^ @]+@[^ @]+[.][^ @]+$')
+        && customer.phone.matches('^(09[0-9]{9}|[+]639[0-9]{9})$');
+    }
+    function validShipping(address) {
+      return exactKeys(address, 5)
+        && text(address.street, 200) && text(address.barangay, 100)
+        && text(address.city, 100) && text(address.province, 100)
+        && address.postalCode.matches('^[0-9]{4}$');
+    }
+    function validPayment(payment) {
+      return exactKeys(payment, 3)
+        && payment.method in ['gcash', 'bank_transfer']
+        && text(payment.referenceCode, 100)
+        && payment.status == 'pending_verification';
+    }
+    function validOrder(order, orderId) {
+      let items = order.items;
+      let subtotal = order.subtotal;
+      return exactKeys(order, 11)
+        && orderId.matches('^[a-zA-Z0-9]{20}$')
+        && order.orderNumber == '1999-' + orderId
+        && validCustomer(order.customer) && validShipping(order.shippingAddress)
+        && validPayment(order.payment) && order.orderStatus == 'pending'
+        && items is list && items.size() >= 1 && items.size() <= 8
+        && subtotal is int && subtotal > 0 && validItems(items, subtotal)
+        && order.shippingFee == 120 && order.total is int
+        && order.total == order.subtotal + order.shippingFee
+        && order.orderNotes is string && order.orderNotes.size() <= 1000
+        && order.createdAt is timestamp && order.createdAt == request.time;
+    }
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'admin@gmail.com'
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+    function validPaymentReview() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return before.payment.status == 'pending_verification'
+        && after.diff(before).affectedKeys().hasOnly(['payment', 'orderStatus', 'paymentVerifiedAt'])
+        && after.payment.diff(before.payment).affectedKeys().hasOnly(['status'])
+        && ((after.payment.status == 'approved' && after.orderStatus == 'processing')
+          || (after.payment.status == 'rejected' && after.orderStatus == 'payment_rejected'))
+        && after.paymentVerifiedAt is timestamp
+        && after.paymentVerifiedAt == request.time;
+    }
+    function validShippingUpdate() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return before.payment.status == 'approved'
+        && (after.orderStatus == 'shipped'
+          ? after.diff(before).affectedKeys().hasOnly(['orderStatus', 'shippingUpdatedAt', 'shippingReference', 'courierName'])
+            && text(after.shippingReference, 150)
+            && after.courierName is string && after.courierName.size() <= 100
+          : after.diff(before).affectedKeys().hasOnly(['orderStatus', 'shippingUpdatedAt']))
+        && ((before.orderStatus == 'processing' && after.orderStatus == 'packed')
+          || (before.orderStatus == 'packed' && after.orderStatus == 'shipped')
+          || (before.orderStatus == 'shipped' && after.orderStatus == 'delivered'))
+        && after.shippingUpdatedAt is timestamp
+        && after.shippingUpdatedAt == request.time;
+    }
+    match /orders/{orderId} {
+      allow create: if request.auth == null && validOrder(request.resource.data, orderId);
+      allow get, list: if isAdmin();
+      allow update: if isAdmin() && (validPaymentReview() || validShippingUpdate());
+      allow delete: if false;
+    }
+    function validProduct(product, productId) {
+      return product.keys().hasOnly(['id', 'name', 'category', 'price', 'images', 'description', 'color', 'sizes', 'stock'])
+        && product.id == productId
+        && text(product.name, 120)
+        && product.category in ['tops', 'bottoms']
+        && product.price is number && product.price > 0 && product.price <= 1000000
+        && product.images is list && product.images.size() <= 8;
+    }
+    function validStockQuantity(quantity) {
+      return quantity is int && quantity >= 0 && quantity <= 999;
+    }
+    function validStock(stock) {
+      return stock is map && stock.keys().hasOnly(['S', 'M', 'L', 'XL'])
+        && validStockQuantity(stock.S) && validStockQuantity(stock.M)
+        && validStockQuantity(stock.L) && validStockQuantity(stock.XL);
+    }
+    match /products/{productId} {
+      // Customer pages read known product documents for availability only.
+      // Firestore reads return a whole document; this collection holds catalog data.
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin() && validProduct(request.resource.data, productId)
+        && validStock(request.resource.data.stock);
+      allow update: if isAdmin() && validProduct(request.resource.data, productId)
+        && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'price', 'category'])
+          // Used by inventory edits and the atomic payment-approval transaction.
+          // Restrict changes to stock and enforce nonnegative bounded integers.
+          || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock'])
+            && validStock(request.resource.data.stock)));
+      allow delete: if isAdmin();
+    }
+    // Initialize the original catalog once, without restoring removed products.
+    match /adminMetadata/productCatalog {
+      allow get: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['initialized'])
+        && request.resource.data.initialized == true;
+      allow list, update, delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

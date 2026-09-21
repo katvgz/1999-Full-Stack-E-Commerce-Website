@@ -1,0 +1,5 @@
+.admin-preview .admin-dashboard-topline { flex-wrap: wrap; }
+.admin-preview .admin-demo-label { white-space: normal; line-height: 1.6; }
+.admin-preview .admin-payment-review form > p { margin-bottom: 16px; }
+.admin-preview .admin-status-list dt { text-transform: capitalize; }
+.admin-preview .admin-order-detail-grid p { overflow-wrap: anywhere; }

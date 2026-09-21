@@ -1,0 +1,70 @@
+.editorial-image.editorial-storefront {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 100px 6% 86px;
+}
+.storefront-study {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  transform: rotate(1.5deg);
+  filter: drop-shadow(6px 12px 12px #00000050);
+}
+.storefront-study-paper {
+  position: relative;
+  padding: 7px 7px 20px;
+  background: #ded9c9;
+  /* Tear only the paper margin; the entire photograph stays visible. */
+  clip-path: polygon(
+    0 2px, 8% 0, 17% 2px, 28% 0, 41% 2px, 58% 0, 73% 2px, 88% 0, 100% 2px,
+    calc(100% - 2px) 24%, 100% 45%, calc(100% - 1px) 72%, 100% calc(100% - 8px),
+    96% calc(100% - 7px), 93% calc(100% - 11px), 89% calc(100% - 5px),
+    85% calc(100% - 7px), 83% 100%, 81% calc(100% - 8px),
+    74% calc(100% - 10px), 68% calc(100% - 5px), 63% calc(100% - 9px),
+    57% calc(100% - 6px), 53% calc(100% - 11px), 48% calc(100% - 7px),
+    43% calc(100% - 8px), 41% calc(100% - 1px), 39% calc(100% - 7px),
+    32% calc(100% - 10px), 25% calc(100% - 5px), 20% calc(100% - 9px),
+    13% calc(100% - 6px), 8% calc(100% - 10px), 0 calc(100% - 7px),
+    2px 76%, 0 51%, 2px 26%
+  );
+}
+.editorial-storefront .storefront-study img {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+.storefront-study-paper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .11;
+  background-image: radial-gradient(#1d1b15 0.5px, transparent 0.8px), radial-gradient(#fffbed 0.5px, transparent 1px);
+  background-size: 3px 5px, 7px 4px;
+  background-position: 0 0, 2px 1px;
+}
+.storefront-study figcaption {
+  margin-top: 14px;
+  padding-left: 3px;
+  color: #c4c0b1;
+  font-family: monospace;
+  font-size: 9px;
+  line-height: 1.6;
+  letter-spacing: 1.2px;
+}
+@media (max-width: 700px) {
+  .editorial-image.editorial-storefront {
+    height: auto;
+    padding: 90px 7% 78px;
+  }
+  .storefront-study figcaption {
+    font-size: 8px;
+    letter-spacing: .8px;
+  }
+}

@@ -1,0 +1,14 @@
+.information-page { min-height: 65svh; }
+.information-content { max-width: 780px; padding-bottom: 40px; font-size: 15px; line-height: 1.8; }
+.information-content p { margin: 20px 0; }
+.information-content ul { padding-left: 20px; margin-bottom: 28px; }
+.information-content li { padding: 7px 0; }
+.information-details > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 18px; padding: 22px 0; border-bottom: 1px solid #cecdc4; scroll-margin-top: 110px; }
+.information-details dt { font-size: 11px; letter-spacing: 1px; }
+.information-details dd { margin: 0; overflow-wrap: anywhere; }
+.information-details dd span { color: #717268; font-size: 12px; }
+.information-size-table { width: 100%; border-collapse: collapse; text-align: left; }
+.information-size-table caption { text-align: left; padding-bottom: 20px; font-size: 12px; }
+.information-size-table th, .information-size-table td { padding: 18px 12px; border-bottom: 1px solid #cecdc4; }
+.information-size-table thead { background: #e5e4dc; font-size: 11px; letter-spacing: 1px; }
+@media (max-width: 540px) { .information-details > div { grid-template-columns: 1fr; gap: 5px; } }

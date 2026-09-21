@@ -1,0 +1,14 @@
+node_modules
+dist
+test-results
+playwright-report
+.npm-cache
+*.local
+.env
+.env.*
+!.env.example
+*-debug.log
+.tools
+.firebase
+.vercel
+*service-account*.json

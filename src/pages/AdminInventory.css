@@ -1,0 +1,5 @@
+.admin-inventory .admin-orders-table th, .admin-inventory .admin-orders-table td { padding: 16px 12px; }
+.admin-inventory-input { width: 72px; min-height: 44px; padding: 8px; font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 1px solid #bab9b0; border-radius: 0; }
+.admin-inventory-status { display: inline-block; padding: 7px 9px; font-size: 9px; letter-spacing: .5px; background: #dce0d4; color: #4b5842; }
+.admin-inventory-status.is-sold-out { background: #e9d8d0; color: #803c30; }
+.admin-inventory-status.is-low-stock { background: #e5dcc8; color: #795b31; }
